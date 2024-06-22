@@ -11,7 +11,35 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '3deaf9af-2665-4d0f-bf1b-2997c99dee6c'
-  imageRepository: 'pritishhukayusamplenodeapp'
+  imageRepository: 'pritishhukayusamplenodeapp'trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'mynodeapp'
+  dockerRegistryServiceConnection: 'lnePritishServiceConnection'  # The name of your service connection
+  dockerRepository: 'lnePritishNodeRepo'  # The repository name in your ACR
+  dockerImageTag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: Docker@2
+      displayName: Build and push Docker image
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(dockerRepository)
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(dockerImageTag)
+
   containerRegistry: 'lnecontainer.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
